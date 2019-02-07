@@ -1,10 +1,12 @@
 const { Router } = require('express');
 const Project = require('./model');
 const ToDo = require('../todos/model');
+const auth = require('../auth/middleware');
 
 const router = new Router();
 
 router.get('/projects', (req, res, next) => {
+  // if there is no limit from query than take 5
   const limit = req.query.limit || 5;
   const offset = req.query.offset || 0;
 
@@ -18,7 +20,8 @@ router.get('/projects', (req, res, next) => {
     .catch(error => next(error))
 });
 
-router.get('/projects/:id', (req, res, next) => {
+ // before you exectu the func, first execute the middleware, if returns true
+router.get('/projects/:id', auth, (req, res, next) => {
   Project
     .findById(req.params.id, { include: [ToDo] })
     .then(project => {
@@ -32,7 +35,7 @@ router.get('/projects/:id', (req, res, next) => {
     .catch(error => next(error))
 });
 
-router.post('/projects', (req, res, next) => {
+router.post('/projects', auth, (req, res, next) => {
   Project
     .create(req.body)
     .then(project => {
@@ -46,7 +49,7 @@ router.post('/projects', (req, res, next) => {
     .catch(error => next(error))
 });
 
-router.delete('/projects/:id', (req, res, next) => {
+router.delete('/projects/:id', auth, (req, res, next) => {
   Project
     .findById(req.params.id)
     .then(project => {
